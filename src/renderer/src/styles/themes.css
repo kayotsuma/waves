@@ -1,0 +1,108 @@
+/* Каждая тема задаёт только токены: цвета поверхностей, текста и линий. */
+:root,
+:root[data-theme='midnight'] {
+  --bg: #0a0a11;
+  --bg-rgb: 10 10 17;
+  --panel: rgb(20 20 32 / 0.62);
+  --panel-solid: #121220;
+  --raised: #1b1b2d;
+  --hover: rgb(255 255 255 / 0.06);
+  --hover-2: rgb(255 255 255 / 0.1);
+  --fg: #f1f1f9;
+  --fg-2: #a5a5bd;
+  --fg-3: #70708a;
+  --line: rgb(255 255 255 / 0.07);
+  --shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+  --scroll: rgb(255 255 255 / 0.14);
+  --scroll-hover: rgb(255 255 255 / 0.26);
+  --on-accent: #fff;
+}
+:root[data-theme='amoled'] {
+  --bg: #000;
+  --bg-rgb: 0 0 0;
+  --panel: rgb(10 10 12 / 0.7);
+  --panel-solid: #09090b;
+  --raised: #151518;
+  --line: rgb(255 255 255 / 0.08);
+}
+:root[data-theme='graphite'] {
+  --bg: #0e0e10;
+  --bg-rgb: 14 14 16;
+  --panel: rgb(30 30 34 / 0.66);
+  --panel-solid: #19191c;
+  --raised: #242428;
+  --fg-2: #a8a8b2;
+}
+:root[data-theme='mocha'] {
+  --bg: #120d0a;
+  --bg-rgb: 18 13 10;
+  --panel: rgb(42 29 22 / 0.62);
+  --panel-solid: #1f1510;
+  --raised: #2e2019;
+  --fg: #f8eee6;
+  --fg-2: #bfa896;
+  --fg-3: #85705f;
+}
+:root[data-theme='forest'] {
+  --bg: #07100c;
+  --bg-rgb: 7 16 12;
+  --panel: rgb(16 34 26 / 0.62);
+  --panel-solid: #0e1d17;
+  --raised: #163025;
+  --fg: #e9f6ef;
+  --fg-2: #96b8a7;
+  --fg-3: #5f8070;
+}
+:root[data-theme='light'] {
+  --bg: #e9ebf3;
+  --bg-rgb: 233 235 243;
+  --panel: rgb(255 255 255 / 0.68);
+  --panel-solid: #ffffff;
+  --raised: #f3f4fa;
+  --hover: rgb(20 20 40 / 0.06);
+  --hover-2: rgb(20 20 40 / 0.1);
+  --fg: #15151f;
+  --fg-2: #565670;
+  --fg-3: #8a8aa2;
+  --line: rgb(20 20 40 / 0.09);
+  --shadow: 0 8px 30px rgb(30 30 70 / 0.1);
+  --scroll: rgb(20 20 40 / 0.2);
+  --scroll-hover: rgb(20 20 40 / 0.35);
+}
+
+/* ───── iOS: системные цвета тёмной и светлой темы ───── */
+:root[data-theme='ios-dark'] {
+  --bg: #000000;
+  --bg-rgb: 0 0 0;
+  --panel: rgb(28 28 30 / 0.72);
+  --panel-solid: #1c1c1e;
+  --raised: #2c2c2e;
+  --hover: rgb(255 255 255 / 0.07);
+  --hover-2: rgb(255 255 255 / 0.12);
+  --fg: #ffffff;
+  --fg-2: rgb(235 235 245 / 0.62);
+  --fg-3: rgb(235 235 245 / 0.42);
+  --line: rgb(84 84 88 / 0.5);
+  --shadow: 0 16px 48px rgb(0 0 0 / 0.5);
+  --scroll: rgb(255 255 255 / 0.16);
+  --scroll-hover: rgb(255 255 255 / 0.3);
+  --on-accent: #fff;
+}
+:root[data-theme='ios-light'] {
+  --bg: #f2f2f7;
+  --bg-rgb: 242 242 247;
+  --panel: rgb(255 255 255 / 0.72);
+  --panel-solid: #ffffff;
+  --raised: #e9e9ee;
+  --hover: rgb(0 0 0 / 0.05);
+  --hover-2: rgb(0 0 0 / 0.09);
+  --fg: #000000;
+  --fg-2: rgb(60 60 67 / 0.66);
+  --fg-3: rgb(60 60 67 / 0.48);
+  --line: rgb(60 60 67 / 0.2);
+  --shadow: 0 12px 36px rgb(0 0 0 / 0.12);
+  --scroll: rgb(0 0 0 / 0.2);
+  --scroll-hover: rgb(0 0 0 / 0.35);
+  --on-accent: #fff;
+  color-scheme: light;
+}

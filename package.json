@@ -1,0 +1,78 @@
+{
+  "name": "wave",
+  "productName": "Wave",
+  "version": "0.1.0",
+  "description": "Личный музыкальный плеер: импорт из YouTube, SoundCloud, Spotify и Яндекс Музыки, локальное хранение, тексты и караоке.",
+  "private": true,
+  "main": "./out/main/index.js",
+  "author": "Wave",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "node scripts/run.mjs dev",
+    "build": "node scripts/run.mjs build",
+    "start": "node scripts/run.mjs preview",
+    "server": "node server/server.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "dist": "node scripts/run.mjs build && electron-builder"
+  },
+  "dependencies": {
+    "@fontsource-variable/google-sans": "^5.3.2",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@material/material-color-utilities": "^0.4.0",
+    "@tanstack/react-virtual": "^3.14.26",
+    "ffmpeg-static": "^5.3.0",
+    "hls.js": "^1.5.20",
+    "lucide-react": "^1.70.0",
+    "music-metadata": "^12.3.5",
+    "node-html-parser": "^9.0.7",
+    "onnxruntime-node": "1.31.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.6"
+  },
+  "build": {
+    "appId": "app.wave.player",
+    "productName": "Wave",
+    "files": [
+      "out/**/*",
+      "!node_modules/onnxruntime-node/bin/**/*cuda*",
+      "!node_modules/onnxruntime-node/bin/**/*tensorrt*"
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**",
+      "node_modules/onnxruntime-node/**"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Audio",
+      "synopsis": "Личный музыкальный плеер"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.music"
+    }
+  }
+}

@@ -1,0 +1,1117 @@
+/*
+ * Трёхпанельный каркас в духе Riff (rootscripts/riff, MIT): слева «Медиатека», по центру содержимое с поиском,
+ * справа «Сейчас играет», внизу плеер. Цвета — собственная палитра Wave (темы и акцент из обложки).
+ * Подключается последним.
+ */
+.app {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  grid-template-rows: 56px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'side top'
+    'side main'
+    'bar bar';
+  padding: var(--gap);
+  row-gap: var(--gap);
+  column-gap: var(--gap);
+}
+.app[data-info='true'] {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) 320px;
+  grid-template-areas:
+    'side top top'
+    'side main info'
+    'bar bar bar';
+}
+.app[data-side='full'] {
+  --sidebar-w: 308px;
+}
+.titlebar {
+  grid-area: top;
+  padding-top: 0;
+}
+.sidebar {
+  grid-area: side;
+}
+.main {
+  grid-area: main;
+}
+.info-panel {
+  grid-area: info;
+}
+.playerbar {
+  grid-area: bar;
+}
+
+/* ───── верхняя панель ───── */
+.tb-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.tb-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.home-btn {
+  margin-left: 4px;
+}
+.dl-btn {
+  position: relative;
+}
+.dl-btn em {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 10.5px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* ───── левая панель «Медиатека» ───── */
+.app[data-side='full'] .sidebar {
+  align-items: stretch;
+  gap: 0;
+  padding: 12px 10px 8px;
+  background: var(--s-low);
+}
+.lib-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 6px 10px 8px;
+}
+.lib-head .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.lib-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 2px;
+  border-bottom: 1px solid var(--line);
+}
+.lib-tabs button {
+  position: relative;
+  flex: 1;
+  height: 42px;
+  border: none;
+  background: none;
+  color: var(--fg-2);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  transition: color 0.15s, background 0.15s;
+}
+.lib-tabs button:hover {
+  background: var(--hover);
+  color: var(--fg);
+}
+.lib-tabs button.on {
+  color: var(--fg);
+}
+.lib-tabs button.on::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent);
+}
+.lib-tabs em {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--hover-2);
+  color: var(--fg-2);
+  font-size: 11px;
+  font-style: normal;
+}
+.lib-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 2px 6px;
+}
+.lib-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  background: var(--s);
+  color: var(--fg-3);
+}
+.lib-search:focus-within {
+  color: var(--fg);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.lib-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  user-select: text;
+}
+.lib-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 18px;
+  background: none;
+  color: var(--fg-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lib-sort:hover {
+  background: var(--hover);
+  color: var(--fg);
+}
+.app[data-side='full'] .pl-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0 8px;
+}
+.lib-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 8px 6px 6px;
+  border-radius: 14px;
+}
+.lib-art {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+.lib-art .cover,
+.lib-art .mosaic {
+  border-radius: 0 !important;
+}
+.lib-txt b {
+  font-size: 15px;
+}
+.lib-cap {
+  margin: 10px 8px 4px;
+  color: var(--fg-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lib-cap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 8px;
+}
+.lib-row.q .icon-btn {
+  opacity: 0;
+}
+.lib-row.q:hover .icon-btn {
+  opacity: 1;
+}
+.lib-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px 4px 0;
+  border-top: 1px solid var(--line);
+}
+.lib-foot .icon-btn {
+  position: relative;
+}
+.lib-foot .dl-btn em {
+  top: 4px;
+  right: 3px;
+}
+
+/* ───── плеер ───── */
+.playerbar {
+  height: 88px;
+  grid-template-columns: minmax(300px, 1.1fr) minmax(340px, 1fr) minmax(300px, 1.1fr);
+}
+.pb-cover {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+.pb-meta {
+  min-width: 0;
+  flex: 1;
+}
+.pb-meta .t2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pb-meta .t2 span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.src-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+.src-badge b {
+  color: var(--fg);
+  font-size: 14px;
+}
+.pb-acts {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.pb-acts .icon-btn {
+  width: 36px;
+  height: 36px;
+}
+.pb-right {
+  justify-content: flex-end;
+}
+
+/* ───── поповер «Аудио» ───── */
+.popover.audio-pop {
+  right: -20px;
+  bottom: 56px;
+  width: 640px;
+  max-width: calc(100vw - 40px);
+  padding: 14px 16px 16px;
+  border-radius: 28px;
+  background: var(--s-high);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.5);
+}
+.audio-pop > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 10px;
+}
+.audio-pop h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.audio-body {
+  display: grid;
+  grid-template-columns: 188px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 300px;
+}
+.audio-body nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.audio-body nav button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 46px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 23px;
+  background: none;
+  color: var(--fg-2);
+  font-weight: 600;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.audio-body nav button:hover {
+  background: var(--hover);
+  color: var(--fg);
+}
+.audio-body nav button.on {
+  background: var(--md-secondary-container, var(--hover-2));
+  color: var(--md-on-secondary-container, var(--fg));
+}
+.audio-body nav .dot {
+  margin-left: auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.audio-content {
+  min-width: 0;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.audio-content .eq-panel {
+  width: auto;
+  padding: 4px 2px;
+  background: none;
+  box-shadow: none;
+  border: none;
+}
+
+/* ───── правая панель «Сейчас играет» ───── */
+.info-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--r-panel);
+  background: var(--s-low);
+  isolation: isolate;
+}
+.info-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 340px;
+  z-index: -1;
+  background: linear-gradient(color-mix(in srgb, var(--pal-0) 70%, transparent), transparent);
+}
+.info-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 6px 20px;
+}
+.info-panel h4 {
+  font-size: 15px;
+  font-weight: 700;
+}
+.info-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 16px 18px;
+}
+.info-cover {
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.4);
+}
+.info-cover .cover {
+  width: 100% !important;
+  height: 100% !important;
+}
+.info-title {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 16px 0 4px;
+}
+.info-title .txt {
+  flex: 1;
+  min-width: 0;
+}
+.info-title h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.info-title p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg-2);
+}
+.info-card {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 14px 14px 10px;
+  border-radius: 22px;
+  background: var(--s);
+}
+.info-card h5 {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fg);
+}
+.credit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+.credit:not(.static):hover {
+  background: var(--hover);
+}
+.credit.static {
+  cursor: default;
+}
+.credit .txt {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+.credit b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.credit small {
+  color: var(--fg-3);
+  font-size: 12.5px;
+}
+.info-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+.info-lyrics {
+  justify-self: start;
+  margin: 6px 0 4px;
+}
+.info-empty {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  padding: 30px 28px;
+  text-align: center;
+}
+.info-ph {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 20px;
+  background: var(--s);
+}
+
+/* ───── поиск ───── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0 6px;
+}
+.top-result {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  max-width: 560px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--s);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.top-result:hover {
+  background: var(--s-high);
+}
+.top-art {
+  flex: none;
+  display: block;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.top-art.round {
+  border-radius: 50%;
+}
+.top-txt {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.top-txt b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.top-txt small {
+  color: var(--fg-2);
+}
+.top-play {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  cursor: pointer;
+  transition: transform 0.2s var(--jelly);
+}
+.top-play:hover {
+  transform: scale(1.08);
+}
+
+.lib-sort {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+  font-size: 0;
+}
+.lib-sort svg {
+  flex: none;
+}
+
+/* ───── узкая центральная панель: прячем лишние колонки списка ───── */
+.main {
+  container-type: inline-size;
+}
+@container (max-width: 760px) {
+  .main .tracklist.tracklist.tracklist {
+    --cols: 44px minmax(0, 1fr) 34px 52px 34px;
+  }
+  .main .tracklist .c-album,
+  .main .tracklist .c-date,
+  .main .tracklist .c-q {
+    display: none;
+  }
+}
+
+/* ───── шапка коллекции: баннер, круглая кнопка «играть» ───── */
+.coll-head {
+  position: relative;
+  align-items: flex-end;
+  gap: 28px;
+  margin: 0 0 18px;
+  padding: 26px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 38%, var(--s)), color-mix(in srgb, var(--pal-0) 40%, var(--s)) 70%);
+}
+.coll-info .kind {
+  color: var(--fg);
+  opacity: 0.8;
+}
+.coll-info h1 {
+  font-weight: 800;
+}
+.coll-liked {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 196px;
+  height: 196px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 80%, #5b3bff), color-mix(in srgb, var(--accent) 30%, #fff));
+  color: #fff;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.35);
+}
+.coll-actions {
+  align-items: center;
+}
+.coll-play {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: none;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  cursor: pointer;
+  transition: transform 0.25s var(--jelly), opacity 0.2s;
+}
+.coll-play:hover:not(:disabled) {
+  transform: scale(1.07);
+}
+.coll-play:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.coll-shuf {
+  width: 48px;
+  height: 48px;
+}
+.coll-actions .btn.lg {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+/* ───── приветствие ───── */
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow-y: auto;
+  background:
+    radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--accent) 38%, transparent), transparent 70%),
+    var(--bg);
+}
+.ob-skip {
+  position: absolute;
+  top: 18px;
+  right: 150px;
+}
+.ob-card {
+  display: grid;
+  gap: 8px;
+  width: min(620px, 100%);
+  animation: obIn 0.45s var(--emph);
+}
+@keyframes obIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+.ob-logo {
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 36px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 45%, #fff));
+  color: var(--on-accent, #fff);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.ob-card h1 {
+  text-align: center;
+  margin-bottom: 14px;
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.ob-panel {
+  display: grid;
+  gap: 8px;
+  padding: 22px 24px;
+  border-radius: 28px;
+  background: var(--s-low);
+}
+.ob-panel h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.ob-panel h3 {
+  font-size: 15px;
+}
+.ob-panel p {
+  color: var(--fg-2);
+}
+.ob-themes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+.ob-theme {
+  display: grid;
+  gap: 8px;
+  padding: 8px 8px 10px;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background: var(--s);
+  color: var(--fg-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ob-theme.on {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.ob-sw {
+  position: relative;
+  display: block;
+  height: 54px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ob-sw i {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 8px;
+  height: 26px;
+  border-radius: 8px;
+}
+.ob-sw b {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: 30px;
+  height: 8px;
+  border-radius: 4px;
+}
+.ob-accents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ob-accents button {
+  width: 34px;
+  height: 34px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.25);
+}
+.ob-accents button.on {
+  border-color: var(--fg);
+}
+.ob-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  color: var(--fg-2);
+  font-size: 14px;
+}
+.ob-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 22px;
+  background: var(--s-low);
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+.ob-btn:hover {
+  background: var(--s);
+}
+.ob-ico {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--s-high);
+  color: var(--fg-2);
+}
+.ob-row .txt {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.ob-row small {
+  color: var(--fg-3);
+  font-size: 13px;
+}
+.ob-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 14px 16px;
+  border-radius: 28px;
+  background: var(--s-low);
+}
+.ob-dots {
+  display: flex;
+  gap: 8px;
+}
+.ob-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--hover-2);
+  transition: width 0.3s var(--jelly), background 0.2s;
+}
+.ob-dots i.on {
+  width: 26px;
+  background: var(--accent);
+}
+
+/* ───── полноэкранный режим в окне: трек слева, караоке справа ───── */
+.nowplaying {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  gap: 4vw;
+  padding: 6vh 4vw 5vh;
+  border: none;
+  border-radius: 0;
+  background: var(--bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+.np-backdrop {
+  position: absolute;
+  inset: -12%;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  filter: blur(70px) saturate(1.5);
+  opacity: 0.85;
+  animation: npFade 0.8s ease;
+}
+@keyframes npFade {
+  from {
+    opacity: 0;
+  }
+}
+.np-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.25), rgb(0 0 0 / 0.55));
+}
+.np-close {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 3;
+  background: rgb(0 0 0 / 0.28);
+}
+.np-left {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 18px;
+  min-height: 0;
+  width: min(100%, 440px);
+  justify-self: center;
+}
+.np-art {
+  width: min(100%, 40vh, 400px);
+  aspect-ratio: 1;
+  align-self: center;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.5);
+}
+.np-art .cover {
+  width: 100% !important;
+  height: 100% !important;
+}
+.np-meta {
+  text-align: center;
+}
+.np-meta h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.np-meta p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+.np-seek .seek {
+  grid-template-columns: 44px 1fr 44px;
+}
+.np-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.np-tools {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.np-tools .volume {
+  width: 150px;
+}
+.np-tools .popover.audio-pop {
+  bottom: 52px;
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: none;
+}
+.np-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 34px;
+}
+.np-tabs {
+  align-self: flex-end;
+  margin: 0 140px 10px 0;
+  background: rgb(0 0 0 / 0.28);
+}
+.np-right > .lyrics,
+.np-right > .lyrics-empty {
+  flex: 1;
+  min-height: 0;
+}
+@media (max-width: 980px) {
+  .nowplaying {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .np-left {
+    padding-top: 30px;
+  }
+}
+
+/* ───── квадратные кнопки: рейка слева и кнопка «играть» ───── */
+.app[data-side='rail'] {
+  --sidebar-w: 76px;
+}
+.app[data-side='rail'] .sidebar {
+  padding: 12px 0 12px;
+  background: var(--s-low);
+}
+.app[data-side='rail'] .sidebar nav {
+  gap: 10px;
+}
+.app[data-side='rail'] .sidebar .nav-item {
+  gap: 0;
+  height: 52px;
+  justify-content: center;
+}
+.app[data-side='rail'] .sidebar .nav-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.app[data-side='rail'] .sidebar .nav-pill {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+.app[data-side='rail'] .sidebar .nav-item.on .nav-pill {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.app[data-side='rail'] .sidebar .nav-pill em {
+  top: 4px;
+  right: 4px;
+}
+.app[data-side='rail'] .sidebar .nav-item.on .nav-pill em {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.sidebar .side-top .icon-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+.play-btn,
+.play-btn[aria-label='Пауза'] {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+}
+.play-btn[aria-label='Пауза'] {
+  border-radius: 18px;
+}
+.icon-btn {
+  border-radius: 14px;
+}
+
+/* ───── улучшение звука ───── */
+.enh-rows {
+  display: grid;
+  gap: 14px;
+  transition: opacity 0.2s;
+}
+.enh-rows.off {
+  opacity: 0.45;
+}
+.enh-row {
+  display: grid;
+  gap: 4px;
+}
+.enh-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 14px;
+}
+.enh-top .val {
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+.enh-row small {
+  color: var(--fg-3);
+  font-size: 12.5px;
+}
+.np-drag {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 40px;
+  z-index: 1;
+  -webkit-app-region: drag;
+}
+.np-close,
+.np-tabs {
+  -webkit-app-region: no-drag;
+}
+.np-close {
+  z-index: 3;
+}

@@ -1,0 +1,244 @@
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #7c5cff;
+}
+
+:root {
+  --accent: #7c5cff;
+  --accent-rgb: 124 92 255;
+  --radius: 14px;
+  --radius-lg: 21px;
+  --blur: 40px;
+  --dim: 0.55;
+  --row-h: 60px;
+  --sidebar-w: 244px;
+  --gap: 8px;
+  --font: 'Inter Variable', system-ui, sans-serif;
+  --pal-0: #3a2a6b;
+  --pal-1: #1d3b63;
+  --pal-2: #2b1f4a;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  transition: --accent 0.9s ease;
+  color-scheme: dark;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-anim='false'] *,
+:root[data-anim='false'] *::before,
+:root[data-anim='false'] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--fg);
+  background: var(--bg);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+a {
+  color: var(--accent);
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+img {
+  display: block;
+  -webkit-user-drag: none;
+}
+code,
+kbd {
+  font-family: ui-monospace, 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+}
+kbd {
+  background: var(--hover);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+input[type='text'],
+input:not([type]),
+input[type='password'],
+textarea,
+.input {
+  user-select: text;
+}
+:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb) / 0.8);
+  outline-offset: 2px;
+}
+.muted {
+  color: var(--fg-2);
+}
+.small {
+  font-size: 12px;
+}
+.pad16 {
+  padding: 16px;
+}
+.spacer {
+  flex: 1;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* скроллбары */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scroll);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-hover);
+  background-clip: content-box;
+  border: 3px solid transparent;
+}
+
+/* ───── каркас ───── */
+.boot {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+}
+.app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  grid-template-rows: 44px minmax(0, 1fr) auto;
+  grid-template-areas: 'title title' 'side main' 'player player';
+  gap: var(--gap);
+  padding: 0 var(--gap) var(--gap);
+}
+.app[data-queue='true'] {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) 340px;
+  grid-template-areas: 'title title title' 'side main right' 'player player player';
+}
+.titlebar {
+  grid-area: title;
+}
+.sidebar {
+  grid-area: side;
+}
+.main {
+  grid-area: main;
+}
+.right-panel {
+  grid-area: right;
+}
+.playerbar {
+  grid-area: player;
+}
+
+.panel {
+  background: var(--panel-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  min-height: 0;
+  overflow: hidden;
+}
+:root[data-glass='true'] .panel,
+:root[data-glass='true'] .playerbar,
+:root[data-glass='true'] .right-panel {
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.35);
+  backdrop-filter: blur(var(--blur)) saturate(1.35);
+}
+
+/* фон */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg);
+  overflow: hidden;
+}
+.bg-img {
+  position: absolute;
+  inset: -80px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(var(--blur)) saturate(1.5);
+  animation: bgIn 0.9s ease both;
+}
+.bg-video {
+  width: calc(100% + 160px);
+  height: calc(100% + 160px);
+  object-fit: cover;
+}
+@keyframes bgIn {
+  from {
+    opacity: 0;
+  }
+}
+.bg-grad {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(55% 50% at 12% 8%, var(--pal-0), transparent 72%),
+    radial-gradient(48% 48% at 92% 18%, var(--pal-1), transparent 72%),
+    radial-gradient(60% 60% at 62% 104%, var(--pal-2), transparent 72%);
+  opacity: 0.6;
+  transition: opacity 0.6s;
+}
+.bg-dim {
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--bg-rgb) / var(--dim));
+}

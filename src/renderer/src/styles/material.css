@@ -1,0 +1,911 @@
+/*
+ * Оформление «Material You» в духе Riff (rootscripts/riff, MIT): плавающие панели с радиусом 28, рейка из иконок слева,
+ * «пилюля» поиска по центру, плавающий плеер, цвета из обложки. Подключается последним и перекрывает базовые стили.
+ * Цветовые токены (--s-*, --md-*) задаёт App.tsx из палитры M3; для классических тем действуют запасные значения.
+ */
+
+/* плавная смена палитры при смене трека */
+@property --bg { syntax: '<color>'; inherits: true; initial-value: #121214; }
+@property --panel-solid { syntax: '<color>'; inherits: true; initial-value: #1a1b1e; }
+@property --raised { syntax: '<color>'; inherits: true; initial-value: #28292c; }
+@property --s-lowest { syntax: '<color>'; inherits: true; initial-value: #0d0e0f; }
+@property --s-low { syntax: '<color>'; inherits: true; initial-value: #1a1b1e; }
+@property --s { syntax: '<color>'; inherits: true; initial-value: #1e1f22; }
+@property --s-high { syntax: '<color>'; inherits: true; initial-value: #28292c; }
+@property --s-highest { syntax: '<color>'; inherits: true; initial-value: #333438; }
+@property --md-secondary-container { syntax: '<color>'; inherits: true; initial-value: #4a4458; }
+@property --md-on-secondary-container { syntax: '<color>'; inherits: true; initial-value: #e8def8; }
+@property --fg { syntax: '<color>'; inherits: true; initial-value: #e6e6e8; }
+@property --fg-2 { syntax: '<color>'; inherits: true; initial-value: #cac4d0; }
+@property --pal-0 { syntax: '<color>'; inherits: true; initial-value: #3a2a6b; }
+@property --pal-1 { syntax: '<color>'; inherits: true; initial-value: #1d3b63; }
+
+:root {
+  --gap: 10px;
+  --r-panel: 28px;
+  --jelly: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --emph: cubic-bezier(0.2, 0, 0, 1);
+  /* запасные значения для классических тем (в Material-темах их перекрывает App.tsx) */
+  --s-lowest: var(--bg);
+  --s-low: var(--panel-solid);
+  --s: color-mix(in srgb, var(--panel-solid) 60%, var(--raised));
+  --s-high: var(--raised);
+  --s-highest: color-mix(in srgb, var(--raised) 80%, var(--fg) 12%);
+  transition:
+    --accent 0.9s ease,
+    --bg 0.9s ease,
+    --panel-solid 0.9s ease,
+    --raised 0.9s ease,
+    --s-lowest 0.9s ease,
+    --s-low 0.9s ease,
+    --s 0.9s ease,
+    --s-high 0.9s ease,
+    --s-highest 0.9s ease,
+    --md-secondary-container 0.9s ease,
+    --md-on-secondary-container 0.9s ease,
+    --fg 0.9s ease,
+    --fg-2 0.9s ease,
+    --pal-0 0.9s ease,
+    --pal-1 0.9s ease;
+}
+:root[data-theme='light'],
+:root[data-theme='material-light'] {
+  color-scheme: light;
+}
+body {
+  font-size: 15px;
+  letter-spacing: 0.005em;
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ───── каркас ───── */
+.app {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  grid-template-rows: 60px minmax(0, 1fr) auto;
+  padding: 0 var(--gap) var(--gap);
+}
+.app[data-side='rail'] {
+  --sidebar-w: 88px;
+}
+.app[data-side='full'] {
+  --sidebar-w: 296px;
+}
+.app[data-queue='true'] {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) 360px;
+}
+.sidebar,
+.main,
+.right-panel,
+.playerbar {
+  transition: background-color 0.9s ease;
+}
+.panel {
+  background: var(--s-low);
+  border: none;
+  box-shadow: none;
+  border-radius: var(--r-panel);
+}
+:root[data-glass='true'] .panel,
+:root[data-glass='true'] .playerbar,
+:root[data-glass='true'] .right-panel {
+  background: color-mix(in srgb, var(--s-low) 78%, transparent);
+}
+
+/* «баннер»: цвета обложки мягко растекаются по верху главной панели */
+.main {
+  position: relative;
+  isolation: isolate;
+}
+.main::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 420px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 100% at 18% 0%, color-mix(in srgb, var(--pal-0) 62%, transparent), transparent 72%),
+    radial-gradient(60% 90% at 88% 0%, color-mix(in srgb, var(--pal-1) 56%, transparent), transparent 72%);
+  mask-image: linear-gradient(#000 30%, transparent);
+  -webkit-mask-image: linear-gradient(#000 30%, transparent);
+}
+
+/* ───── заголовок окна ───── */
+.titlebar {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 480px) 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.tb-nav {
+  justify-self: start;
+}
+.tb-actions {
+  justify-self: end;
+}
+.search {
+  width: 100%;
+  max-width: none;
+  height: 44px;
+  margin: 0;
+  padding: 0 14px 0 16px;
+  gap: 10px;
+  border: none;
+  border-radius: 22px;
+  background: var(--s);
+  color: var(--fg-2);
+  transition: background 0.2s var(--emph), box-shadow 0.2s var(--emph);
+}
+.search:hover {
+  background: var(--s-high);
+}
+.search:focus-within {
+  background: var(--s-high);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  color: var(--fg);
+}
+.search input::placeholder {
+  color: var(--fg-2);
+  opacity: 0.8;
+}
+.search kbd {
+  background: var(--hover);
+  border: none;
+  color: var(--fg-3);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+/* ───── кнопки и поля ───── */
+.btn {
+  height: 40px;
+  padding: 0 20px;
+  border: none;
+  background: var(--s-high);
+  font-weight: 600;
+}
+.btn:hover:not(:disabled) {
+  background: var(--s-highest);
+}
+.btn.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: none;
+}
+.btn.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 90%, var(--fg));
+}
+.btn.tonal {
+  background: var(--md-secondary-container, var(--hover-2));
+  color: var(--md-on-secondary-container, var(--fg));
+}
+.btn.tonal:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--md-secondary-container, var(--hover-2)) 88%, var(--fg));
+}
+.btn.sm {
+  height: 32px;
+}
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  transition: color 0.15s, background 0.15s, transform 0.3s var(--jelly);
+}
+.icon-btn.sm {
+  width: 30px;
+  height: 30px;
+}
+.icon-btn.active {
+  background: var(--md-secondary-container, var(--hover));
+  color: var(--md-on-secondary-container, var(--accent));
+}
+.input,
+.select {
+  height: 40px;
+  border: none;
+  border-radius: 14px;
+  background: var(--s-high);
+}
+.input:focus,
+.select:focus {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.seg {
+  background: var(--s-high);
+  border: none;
+  padding: 4px;
+}
+.seg button {
+  padding: 6px 16px;
+}
+.seg button.on {
+  background: var(--md-secondary-container, var(--accent));
+  color: var(--md-on-secondary-container, var(--on-accent));
+}
+.chip {
+  height: 32px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 16px;
+  background: var(--s-high);
+  color: var(--fg-2);
+  font-weight: 500;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+.chip:hover:not(:disabled) {
+  background: var(--s-highest);
+}
+.chip.on {
+  background: var(--md-secondary-container, rgb(var(--accent-rgb) / 0.22));
+  color: var(--md-on-secondary-container, var(--accent));
+}
+.switch span {
+  background: var(--s-highest);
+}
+.switch span::after {
+  background: var(--fg-3);
+}
+.switch input:checked + span::after {
+  background: var(--on-accent);
+}
+
+/* ───── боковая панель: рейка из иконок / развёрнутая ───── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 14px;
+  gap: 10px;
+  background: var(--s);
+  border-radius: var(--r-panel);
+  min-height: 0;
+  overflow: hidden;
+}
+.side-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2px 0 10px;
+}
+.brand {
+  display: none;
+  padding: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+.app[data-side='full'] .side-top {
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 2px 14px 10px 14px;
+}
+.app[data-side='full'] .brand {
+  display: flex;
+}
+.logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.app[data-side='full'] .sidebar nav {
+  gap: 2px;
+}
+.app[data-side='full'] .side-grow {
+  display: none;
+}
+.side-grow {
+  flex: 1;
+  min-height: 0;
+}
+.sidebar .nav-item {
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  width: 100%;
+  border-radius: 0;
+  background: none;
+  color: var(--fg-2);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: center;
+}
+.sidebar .nav-item:hover {
+  background: none;
+  color: var(--fg);
+}
+.sidebar .nav-pill {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 34px;
+  border-radius: 17px;
+  transition: background 0.2s var(--emph), color 0.2s, transform 0.35s var(--jelly);
+}
+.sidebar .nav-item:hover .nav-pill {
+  background: var(--hover-2);
+}
+.sidebar .nav-item:active .nav-pill {
+  transform: scale(0.92);
+}
+.sidebar .nav-item.on {
+  background: none;
+  color: var(--fg);
+}
+.sidebar .nav-item.on .nav-pill {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.sidebar .nav-item.on svg {
+  color: inherit;
+}
+.sidebar .nav-label {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar .nav-pill em {
+  position: absolute;
+  top: -3px;
+  right: 2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  font-size: 10.5px;
+  line-height: 1;
+  background: var(--md-secondary-container, var(--hover-2));
+  color: var(--md-on-secondary-container, var(--fg));
+}
+.sidebar .nav-pill em.live {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.sidebar .nav-item.on .nav-pill em {
+  background: var(--on-accent);
+  color: var(--accent);
+}
+/* развёрнутая панель */
+.app[data-side='full'] .sidebar {
+  align-items: stretch;
+}
+.app[data-side='full'] .sidebar nav {
+  padding: 0 12px;
+}
+.app[data-side='full'] .sidebar .nav-item:not(.sub) {
+  flex-direction: row;
+  gap: 14px;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 26px;
+  font-size: 14.5px;
+  text-align: left;
+}
+.app[data-side='full'] .sidebar .nav-item:not(.sub):hover {
+  background: var(--hover);
+}
+.app[data-side='full'] .sidebar .nav-item:not(.sub).on {
+  background: var(--md-secondary-container, var(--hover-2));
+  color: var(--md-on-secondary-container, var(--fg));
+}
+.app[data-side='full'] .sidebar > .nav-item {
+  margin: 0 12px;
+  width: auto;
+}
+.app[data-side='full'] .sidebar .nav-pill {
+  width: auto;
+  height: auto;
+  background: none !important;
+  color: inherit !important;
+}
+.app[data-side='full'] .sidebar .nav-item .nav-label {
+  flex: 1;
+  text-align: left;
+}
+.app[data-side='full'] .sidebar .nav-pill em {
+  position: static;
+  margin-left: 8px;
+}
+.side-lib {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  padding: 0 12px;
+}
+.side-sec {
+  padding: 8px 6px 4px 12px;
+}
+.pl-list {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+.sidebar .nav-item.sub {
+  flex-direction: row;
+  gap: 12px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  width: 100%;
+}
+.sidebar .nav-item.sub span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar .nav-item.sub:hover {
+  background: var(--hover);
+}
+.sidebar .nav-item.sub.on {
+  background: var(--md-secondary-container, var(--hover-2));
+  color: var(--md-on-secondary-container, var(--fg));
+}
+.sidebar .nav-item.sub em {
+  background: none;
+  color: var(--fg-3);
+}
+
+/* ───── «Медиатека» в духе Spotify: плейлисты с обложками ───── */
+.app[data-side='full'] .sidebar nav {
+  padding: 0 12px 6px;
+}
+.app[data-side='full'] .side-lib {
+  margin: 4px 0 6px;
+  padding: 6px 8px 0;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--s-lowest) 55%, transparent);
+  overflow: hidden;
+}
+.side-sec h5 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fg-2);
+}
+.side-sec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 6px 8px 14px;
+}
+.pl-list {
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 8px;
+}
+.lib-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.lib-row:hover {
+  background: var(--hover);
+}
+.lib-row.on {
+  background: var(--hover-2);
+}
+.lib-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--s-high);
+  color: var(--fg-2);
+}
+.lib-art.liked {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 75%, #4a2cff), color-mix(in srgb, var(--accent) 35%, #fff));
+  color: #fff;
+}
+.lib-txt {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+.lib-txt b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+.lib-row.on .lib-txt b {
+  color: var(--accent);
+}
+.lib-txt small {
+  color: var(--fg-3);
+  font-size: 12.5px;
+}
+.lib-empty {
+  padding: 8px 12px;
+}
+
+/* ───── правая панель ───── */
+.right-panel {
+  background: var(--s-low);
+  border: none;
+  box-shadow: none;
+  border-radius: var(--r-panel);
+}
+.qrow {
+  border-radius: 14px;
+}
+
+/* ───── плеер: плавающая панель ───── */
+.playerbar {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 640px) minmax(0, 1fr);
+  height: 88px;
+  padding: 0 22px;
+  border: none;
+  border-radius: var(--r-panel);
+  background: var(--s);
+  box-shadow: none;
+}
+.pb-left {
+  gap: 14px;
+}
+.pb-cover {
+  border-radius: 0;
+  display: grid;
+  transition: transform 0.35s var(--jelly);
+}
+.pb-cover:hover {
+  transform: scale(1.06);
+}
+.pb-meta .t1 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.pb-meta .t2 {
+  color: var(--fg-2);
+  font-size: 13px;
+}
+.cookie {
+  display: block;
+  flex: none;
+  animation: cookieSpin 22s linear infinite;
+  animation-play-state: paused;
+}
+.cookie.spin {
+  animation-play-state: running;
+}
+@keyframes cookieSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.controls {
+  gap: 8px;
+}
+.controls .icon-btn {
+  width: 42px;
+  height: 42px;
+}
+.play-btn {
+  width: 60px;
+  height: 52px;
+  border-radius: 20px;
+  background: var(--fg);
+  color: var(--bg);
+  box-shadow: none;
+  transition: border-radius 0.45s var(--jelly), transform 0.3s var(--jelly), background 0.2s;
+}
+/* форма кнопки «перетекает» между паузой (круг) и воспроизведением (скруглённый прямоугольник) */
+.play-btn[aria-label='Пауза'] {
+  border-radius: 26px;
+  width: 52px;
+}
+.play-btn:hover {
+  transform: scale(1.06);
+  background: var(--fg);
+  color: var(--bg);
+}
+.play-btn:active {
+  transform: scale(0.94);
+}
+.seek {
+  grid-template-columns: 48px 1fr 48px;
+  gap: 8px;
+}
+.seek .time {
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.squiggly-seek {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  touch-action: none;
+  border-radius: 10px;
+}
+.squiggly-seek:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 6px;
+}
+.slider::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+}
+.pb-right {
+  gap: 2px;
+}
+
+/* ───── содержимое: заголовки, карточки, плитки ───── */
+.view-head h1 {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.stats > div {
+  background: var(--s);
+  border: none;
+  border-radius: 20px;
+}
+.stats b {
+  font-weight: 600;
+}
+.shelf {
+  margin-top: 30px;
+}
+.shelf h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 600;
+}
+.shelf h2 svg {
+  color: var(--accent);
+}
+.card {
+  padding: 12px;
+  margin: 0;
+  border-radius: calc(var(--radius) + 6px);
+  background: var(--s);
+  transition: background 0.2s var(--emph), transform 0.35s var(--jelly);
+}
+.card:hover {
+  background: var(--s-high);
+}
+.card:active {
+  transform: scale(0.985);
+}
+.card-art {
+  box-shadow: none;
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+}
+.card-play {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.35);
+}
+.card-t1 {
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.card-t2 {
+  color: var(--fg-2);
+}
+.row-scroll {
+  gap: 12px;
+  margin: -6px;
+  padding: 6px 6px 10px;
+}
+.row-scroll .card {
+  width: 184px;
+}
+.grid {
+  gap: 14px;
+}
+/* быстрые плитки на главной: «Любимое» и плейлисты, как «Liked songs» у Riff */
+.quick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+.quick-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 64px;
+  padding: 0 16px 0 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--s);
+  text-align: left;
+  min-width: 0;
+  transition: background 0.2s var(--emph), transform 0.35s var(--jelly);
+}
+.quick-tile:hover {
+  background: var(--s-high);
+}
+.quick-tile:active {
+  transform: scale(0.98);
+}
+.quick-tile .qt-art {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  background: var(--md-primary-container, var(--hover-2));
+  color: var(--md-on-primary-container, var(--accent));
+}
+.quick-tile .qt-txt {
+  min-width: 0;
+  display: grid;
+}
+.quick-tile .qt-t1 {
+  font-weight: 600;
+  font-size: 14.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quick-tile .qt-t2 {
+  font-size: 12.5px;
+  color: var(--fg-2);
+}
+
+/* ───── окна и меню ───── */
+.modal {
+  background: var(--s-high);
+  border: none;
+  border-radius: var(--r-panel);
+}
+.modal-back {
+  background: rgb(0 0 0 / 0.45);
+}
+.popover {
+  filter: none;
+}
+.eq-panel {
+  background: var(--s-high);
+  border: none;
+  border-radius: 24px;
+}
+.ctx-menu {
+  background: var(--s-high);
+  border: none;
+  border-radius: 16px;
+}
+.ctx-item {
+  border-radius: 10px;
+}
+.toast {
+  border-radius: 16px;
+  background: var(--s-highest);
+  border: none;
+}
+.nowplaying {
+  inset: 60px var(--gap) calc(var(--gap) + 98px);
+  border: none;
+  border-radius: var(--r-panel);
+  background: color-mix(in srgb, var(--s-low) 88%, transparent);
+}
+.hero-badge {
+  background: var(--md-secondary-container, var(--hover-2));
+  color: var(--md-on-secondary-container, var(--fg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie {
+    animation: none;
+  }
+}
+
+/* ───── импорт из SoundCloud ───── */
+.sc-import {
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--fg);
+  grid-column: 1 / -1;
+}
+.sc-import:hover {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.sc-body h4 {
+  margin: 14px 0 8px;
+}
+.sc-sec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 2px 6px;
+  color: var(--fg-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sc-list {
+  max-height: 280px;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+}
+.sc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.sc-row:hover {
+  background: var(--hover);
+}
+.sc-ico {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--s-high);
+  color: var(--accent);
+}
+.sc-row .txt {
+  display: grid;
+  min-width: 0;
+}
+.sc-row b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.sc-row small {
+  color: var(--fg-3);
+  font-size: 12.5px;
+}
